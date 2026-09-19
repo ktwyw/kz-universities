@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Universities of Kazakhstan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #EAF4FB;
+      --card: #FFFFFF;
+      --ink: #0F2A44;
+      --muted: #587089;
+      --line: #CFE0EE;
+      --sky: #00AFCA;     /* flag turquoise */
+      --gold: #E8B32B;    /* flag gold */
+      --font: "Manrope", "Segoe UI", system-ui, sans-serif;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0C1A28; --card: #142639; --ink: #E6F0F8; --muted: #93AAC1; --line: #23394F;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0C1A28; --card: #142639; --ink: #E6F0F8; --muted: #93AAC1; --line: #23394F;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); line-height: 1.5; }
+    main { max-width: 960px; margin: 0 auto; padding: 36px 20px 60px; }
+
+    header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+    h1 { margin: 0 0 4px; font-size: 2rem; font-weight: 700; }
+    h1::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); margin-right: 12px; vertical-align: 0.05em; }
+    .lead { margin: 0; color: var(--muted); max-width: 60ch; }
+    .search { flex: 1; min-width: 240px; max-width: 340px; }
+    .search input {
+      width: 100%; font: inherit; padding: 10px 14px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    }
+    .search input:focus { outline: 2px solid var(--sky); outline-offset: 2px; }
+
+    h2 {
+      font-size: 0.95rem; font-weight: 700; color: var(--muted);
+      margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--sky);
+    }
+    h2 span { color: var(--muted); font-weight: 400; margin-left: 8px; }
+
+    .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+    .uni {
+      display: block; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      padding: 14px 16px; color: inherit; text-decoration: none;
+    }
+    .uni:hover, .uni:focus-visible { border-color: var(--sky); outline: none; }
+    .uni strong { display: block; font-weight: 700; margin-bottom: 2px; }
+    .uni .site { color: var(--sky); font-size: 0.85rem; word-break: break-all; }
+    .uni .tag { color: var(--muted); font-size: 0.8rem; margin-left: 6px; }
+
+    .hidden { display: none; }
+    .none { color: var(--muted); margin-top: 28px; }
+    footer { margin-top: 40px; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Universities of Kazakhstan</h1>
+        <p class="lead">Official websites of the country's major universities and international branch campuses, grouped by region. Type to filter by name, city or field.</p>
+      </div>
+      <div class="search">
+        <input id="q" type="search" placeholder="Search…" aria-label="Filter universities">
+      </div>
+    </header>
+
+    <div id="groups"></div>
+    <p id="none" class="none hidden">No match. Try a shorter word.</p>
+
+    <footer>
+      <p>"National" marks universities with national status. Links were checked in September 2026; university sites change their addresses from time to time, so if one fails, search the name.</p>
+      <p>Missing one? Add a line to the list in <code>index.html</code> and open a pull request.</p>
+    </footer>
+  </main>
+
+  <script>
+    const UNIVERSITIES = [
+      // Each entry: name, official website, group (city or category), short tag
+      // ---- Astana ----
+      ["Nazarbayev University", "https://nu.edu.kz", "Astana", "research, English-medium"],
+      ["L.N. Gumilyov Eurasian National University (ENU)", "https://enu.kz", "Astana", "national"],
+      ["Astana IT University", "https://astanait.edu.kz", "Astana", "IT"],
+      ["Astana Medical University", "https://amu.kz", "Astana", "medicine"],
+      ["S. Seifullin Kazakh Agrotechnical Research University", "https://kazatu.edu.kz", "Astana", "agriculture, engineering"],
+      ["Maqsut Narikbayev University (MNU, formerly KAZGUU)", "https://mnu.kz", "Astana", "law, economics"],
+      ["Astana International University (AIU)", "https://aiu.edu.kz", "Astana", "multidisciplinary"],
+      ["Kazakh University of Economics, Finance and International Trade", "https://kuef.kz", "Astana", "economics, finance"],
+      ["Kazakh National University of Arts", "https://kaznua.kz", "Astana", "arts"],
+      ["Esil University", "https://esil.edu.kz", "Astana", "economics, business"],
+      ["Turan-Astana University", "https://tau-edu.kz", "Astana", "business, humanities"],
+      ["Academy of Public Administration under the President", "https://apa.kz", "Astana", "public administration"],
+
+      // ---- Almaty ----
+      ["Al-Farabi Kazakh National University (KazNU)", "https://farabi.university", "Almaty", "national, largest"],
+      ["Satbayev University", "https://satbayev.university", "Almaty", "national, engineering"],
+      ["KIMEP University", "https://kimep.kz", "Almaty", "business, social sciences"],
+      ["Kazakh-British Technical University (KBTU)", "https://kbtu.edu.kz", "Almaty", "engineering, IT"],
+      ["Abai Kazakh National Pedagogical University", "https://kaznpu.kz", "Almaty", "national, education"],
+      ["S.D. Asfendiyarov Kazakh National Medical University", "https://kaznmu.kz", "Almaty", "national, medicine"],
+      ["Kazakh National Agrarian Research University", "https://kaznaru.edu.kz", "Almaty", "national, agriculture"],
+      ["Suleyman Demirel University (SDU)", "https://sdu.edu.kz", "Almaty", "Kaskelen; engineering, education"],
+      ["International IT University (IITU)", "https://iitu.edu.kz", "Almaty", "IT"],
+      ["Kazakh-German University (DKU)", "https://dku.kz", "Almaty", "engineering, economics"],
+      ["Narxoz University", "https://narxoz.kz", "Almaty", "economics, business"],
+      ["Almaty Management University (AlmaU)", "https://almau.edu.kz", "Almaty", "business"],
+      ["University of International Business (UIB)", "https://uib.kz", "Almaty", "business"],
+      ["Turan University", "https://turan-edu.kz", "Almaty", "business, humanities"],
+      ["Kazakh Ablai Khan University of International Relations and World Languages", "https://ablaikhan.kz", "Almaty", "languages, diplomacy"],
+      ["Gumarbek Daukeev Almaty University of Power Engineering and Telecommunications", "https://aues.edu.kz", "Almaty", "energy, telecom"],
+      ["Kazakh National Women's Teacher Training University", "https://qyzpu.edu.kz", "Almaty", "education"],
+      ["T. Zhurgenov Kazakh National Academy of Arts", "https://kaznai.kz", "Almaty", "arts, film, theatre"],
+      ["Kurmangazy Kazakh National Conservatory", "https://conservatoire.kz", "Almaty", "music"],
+      ["Kazakh Academy of Sports and Tourism", "https://kazast.kz", "Almaty", "sports"],
+      ["Kazakh Leading Academy of Architecture and Civil Engineering (KazGASA)", "https://kazgasa.kz", "Almaty", "architecture"],
+      ["Academy of Logistics and Transport (formerly KazATC)", "https://alt.edu.kz", "Almaty", "transport, logistics"],
+      ["Almaty Technological University", "https://atu.edu.kz", "Almaty", "food and light industry"],
+      ["Caspian University", "https://cu.edu.kz", "Almaty", "law, engineering"],
+
+      // ---- Shymkent & Turkistan ----
+      ["M. Auezov South Kazakhstan University", "https://auezov.edu.kz", "Shymkent & Turkistan", "Shymkent; multidisciplinary"],
+      ["South Kazakhstan Medical Academy", "https://skma.edu.kz", "Shymkent & Turkistan", "Shymkent; medicine"],
+      ["O. Zhanibekov South Kazakhstan Pedagogical University", "https://okmpu.kz", "Shymkent & Turkistan", "Shymkent; education"],
+      ["Khoja Akhmet Yassawi International Kazakh-Turkish University", "https://ayu.edu.kz", "Shymkent & Turkistan", "Turkistan; international"],
+      ["International University of Tourism and Hospitality", "https://iuth.edu.kz", "Shymkent & Turkistan", "Turkistan; tourism"],
+
+      // ---- Karaganda ----
+      ["E.A. Buketov Karaganda University", "https://buketov.edu.kz", "Karaganda", "multidisciplinary"],
+      ["Abylkas Saginov Karaganda Technical University", "https://kstu.kz", "Karaganda", "engineering"],
+      ["Karaganda Medical University", "https://qmu.kz", "Karaganda", "medicine"],
+      ["Karaganda University of Kazpotrebsoyuz", "https://keu.kz", "Karaganda", "economics, law"],
+
+      // ---- East ----
+      ["D. Serikbayev East Kazakhstan Technical University", "https://ektu.kz", "East Kazakhstan", "Oskemen; engineering"],
+      ["Sarsen Amanzholov East Kazakhstan University", "https://vku.edu.kz", "East Kazakhstan", "Oskemen; multidisciplinary"],
+      ["Kazakh-American Free University", "https://kafu.edu.kz", "East Kazakhstan", "Oskemen; business, law"],
+      ["Shakarim University", "https://shakarim.edu.kz", "East Kazakhstan", "Semey; multidisciplinary"],
+      ["Semey Medical University", "https://smu.edu.kz", "East Kazakhstan", "Semey; medicine"],
+
+      // ---- North ----
+      ["Toraighyrov University", "https://tou.edu.kz", "North Kazakhstan", "Pavlodar; multidisciplinary"],
+      ["Pavlodar Pedagogical University", "https://ppu.edu.kz", "North Kazakhstan", "Pavlodar; education"],
+      ["Innovative University of Eurasia", "https://ineu.kz", "North Kazakhstan", "Pavlodar; private"],
+      ["Manash Kozybayev North Kazakhstan University", "https://ku.edu.kz", "North Kazakhstan", "Petropavl; multidisciplinary"],
+      ["Sh. Ualikhanov Kokshetau University", "https://shokan.edu.kz", "North Kazakhstan", "Kokshetau; multidisciplinary"],
+      ["A. Baitursynov Kostanay Regional University", "https://ksu.edu.kz", "North Kazakhstan", "Kostanay; multidisciplinary"],
+
+      // ---- West ----
+      ["K. Zhubanov Aktobe Regional University", "https://zhubanov.edu.kz", "West Kazakhstan", "Aktobe; multidisciplinary"],
+      ["West Kazakhstan Marat Ospanov Medical University", "https://zkmu.kz", "West Kazakhstan", "Aktobe; medicine"],
+      ["M. Utemisov West Kazakhstan University", "https://wku.edu.kz", "West Kazakhstan", "Uralsk; multidisciplinary"],
+      ["Zhangir Khan West Kazakhstan Agrarian-Technical University", "https://wkau.kz", "West Kazakhstan", "Uralsk; agriculture, engineering"],
+      ["Sh. Yessenov University", "https://yu.edu.kz", "West Kazakhstan", "Aktau; engineering, oil & gas"],
+      ["Kh. Dosmukhamedov Atyrau University", "https://asu.edu.kz", "West Kazakhstan", "Atyrau; multidisciplinary"],
+      ["Safi Utebayev Atyrau University of Oil and Gas", "https://aogu.edu.kz", "West Kazakhstan", "Atyrau; oil & gas"],
+
+      // ---- South ----
+      ["Korkyt Ata Kyzylorda University", "https://korkyt.kz", "South Kazakhstan", "Kyzylorda; multidisciplinary"],
+      ["M.Kh. Dulaty Taraz Regional University", "https://dulaty.kz", "South Kazakhstan", "Taraz; multidisciplinary"],
+      ["I. Zhansugurov Zhetysu University", "https://zu.edu.kz", "South Kazakhstan", "Taldykorgan; multidisciplinary"],
+
+      // ---- International branch campuses ----
+      ["Cardiff University Kazakhstan", "https://www.cardiff.ac.uk/kazakhstan", "International branch campuses", "Astana; UK, Russell Group, opened 2025"],
+      ["Coventry University Kazakhstan", "https://coventry.edu.kz", "International branch campuses", "Astana; UK, opened 2024"],
+      ["De Montfort University Kazakhstan", "https://dmuk.edu.kz", "International branch campuses", "Almaty; UK, opened 2021"],
+      ["Lomonosov Moscow State University, Kazakhstan Branch", "https://msu.kz", "International branch campuses", "Astana; Russia, since 2001"],
+    ];
+
+    // Group the flat list by region/city, keeping the order groups first appear in
+    const byCity = new Map();
+    for (const u of UNIVERSITIES) {
+      if (!byCity.has(u[2])) byCity.set(u[2], []);
+      byCity.get(u[2]).push(u);
+    }
+
+    const groups = document.getElementById("groups");
+    for (const [city, list] of byCity) {
+      const section = document.createElement("section");
+      section.innerHTML = `<h2>${city}<span>${list.length}</span></h2><div class="list"></div>`;
+      const grid = section.querySelector(".list");
+      for (const [name, url, , tag] of list) {
+        const a = document.createElement("a");
+        a.className = "uni";
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.dataset.text = `${name} ${city} ${tag}`.toLowerCase();
+        a.innerHTML = `<strong>${name}</strong><span class="site">${url.replace("https://", "")}</span><span class="tag">${tag}</span>`;
+        grid.append(a);
+      }
+      groups.append(section);
+    }
+
+    // Live filter: hide cards that don't match, and whole cities with no matches
+    document.getElementById("q").addEventListener("input", e => {
+      const q = e.target.value.trim().toLowerCase();
+      let any = false;
+      for (const section of groups.children) {
+        let shown = 0;
+        for (const card of section.querySelectorAll(".uni")) {
+          const hit = !q || card.dataset.text.includes(q);
+          card.classList.toggle("hidden", !hit);
+          if (hit) shown++;
+        }
+        section.classList.toggle("hidden", shown === 0);
+        section.querySelector("h2 span").textContent = shown;
+        if (shown) any = true;
+      }
+      document.getElementById("none").classList.toggle("hidden", any);
+    });
+  </script>
+</body>
+</html>
